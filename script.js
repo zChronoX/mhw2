@@ -6,10 +6,6 @@ const allAnswers = document.querySelectorAll('.choice-grid div');
 const userAnswers = {}; // dizionario composto da key = questionId e value = risposta inserita dall'utente
 const questions = {}; // dizionario composto da key = questionId e value = risposte che fanno riferimento a quella domanda
 
-
-
-
-
 function scegliRisposta(event) {
   const risposta = event.currentTarget;
   const { questionId, choiceId } = risposta.dataset; // javascript destructuring
@@ -17,78 +13,48 @@ function scegliRisposta(event) {
 
   const answers = questions[questionId] || [];
   for (const answer of answers) {
-
     const answerChoiceId = answer.dataset.choiceId;
     const checkbox = answer.querySelector('.checkbox');
     checkbox.src = answerChoiceId === choiceId ? imgCheck : imgUnchecked; // cambio l'immagine della checkbox in base alla condizione 'answerChoiceId === choiceId'
     answer.classList.add(answerChoiceId === choiceId ? 'selected' : 'uncheck'); // aggiungo classe css per evidenziare la risposta o opacizzare le altre (regole css da aggiungere)
     answer.classList.remove(answerChoiceId === choiceId ? 'uncheck' : 'selected'); // rimuovo classe css per evidenziare la risposta o opacizzare le altre (regole css da aggiungere)
-
-
   }
 
-  if (userAnswers.one !== undefined && userAnswers.two !== undefined && userAnswers.three !== undefined) {
-    for (const answ of answers) {
-      answ.removeEventListener('click', scegliRisposta);
+  checkUserAnswers();
+}
+
+function checkUserAnswers() {
+  let canShowResult = true; // di default dico che è possibile visualizzare il risultato
+  for (const key in userAnswers) { // controllo tutte le key presenti nel dizionario userAnswers
+    // se trovo una risposta === undefined allora significa che l'utente non ha selezionato tutte le risposte 
+    // e quindi non posso visualizzare il risultato
+    if (!userAnswers[key]) {
+      canShowResult = false;
     }
-   
   }
 
-showResults();
-
-
+  if (canShowResult) { // se la variabile resta true, allora significa che l'utente ha risposto a tutte le domande
+    for (const answer of allAnswers) {
+      answer.removeEventListener('click', scegliRisposta); // elimino l'eventListener sul click
+    }
+    showResults(); // visualizzo il risultato
+  }
 }
 
-
-
-
-
-
-
-
-
-
-for (const answer of allAnswers) {
-  const questionId = answer.dataset.questionId;
-  if (!questions[questionId]) {
-    questions[questionId] = [];
+function showResults() {
+  const result = getResult(); // prendo il risultato da visualizzare
+  if (result) {
+    const resultSection = document.querySelector('#result');
+    resultSection.querySelector('#resultTitle').textContent = RESULTS_MAP[result].title; // modifico il titolo nell'html
+    resultSection.querySelector('#resultText').textContent = RESULTS_MAP[result].contents; // modifico il testo nell'html
+    resultSection.classList.remove('hidden'); // elimino la classe hidden
+    // posiziono la scrollbar affinche questo elemento venga visualizzato
+    // l'opzione smooth serve per fare lo scroll con un'animazione
+    resultSection.scrollIntoView({ behavior: 'smooth' });
   }
-  questions[questionId].push(answer);
-  answer.addEventListener('click', scegliRisposta);
-
 }
 
-
-
-
-
-
-
-
-
-function reset() {
-  for (const answer in userAnswers) {
-    delete userAnswers[answer];
-  }
-
-  for (answ of allAnswers) {
-    answ.addEventListener('click', scegliRisposta);
-    answ.querySelector('.checkbox').src = imgUnchecked;
-    answ.classList.remove('selected');
-    answ.classList.remove('uncheck');
-    const rTlt = document.querySelector('#resultTitle');
-    const rTxt = document.querySelector('#resultText');
-    rTlt.classList.add('hidden');
-    rTxt.classList.add('hidden');
-
-
-    scrollTo(0, 0);
-
-  }
-
-}
-
-function results() {
+function getResult() {
   if (userAnswers.one === userAnswers.three || userAnswers.one === userAnswers.two) {
     return userAnswers.one;
   }
@@ -103,48 +69,43 @@ function results() {
   }
 
 }
-/*{
-
-if (userAnswers.one === userAnswers.three || userAnswers.one === userAnswers.two) {
-  return userAnswers.one;
-}
-if (userAnswers.two === userAnswers.three || userAnswers.two === userAnswers.one) {
-  return userAnswers.two;
-}
-if (userAnswers.three === userAnswers.one || userAnswers.three === userAnswers.two) {
-  return userAnswers.three;
-}
-
-return userAnswers.one;
-}*/
 
 
 
-function showResults() {
-  const res = results();
-  const rTlt = document.querySelector('#resultTitle');
-  const rTxt = document.querySelector('#resultText');
-  rTlt.classList.remove('hidden');
-  rTxt.classList.remove('hidden');
-  const HidRes = document.querySelector('#result');
-  HidRes.querySelector('#resultTitle').textContent = RESULTS_MAP[res].title;
-  HidRes.querySelector('#resultText').textContent = RESULTS_MAP[res].contents;
-  HidRes.classList.remove('hidden');
+function reset() {
+  for (const answer in userAnswers) {
+    userAnswers[answer] = undefined; // elimino le risposte dell'utente
+  }
 
-
-
-
-
-
-
-
-
-
+  for (const answ of allAnswers) {
+    answ.addEventListener('click', scegliRisposta); // ricreo l'eventListener sul click delle risposte
+    answ.querySelector('.checkbox').src = imgUnchecked; // resetto l'immagine della checkbox
+    answ.classList.remove('selected'); // elimino la classe selected
+    answ.classList.remove('uncheck'); // elimino la classe uncheck
+    const resultSection = document.querySelector('#result');
+    resultSection.classList.add('hidden'); // nascondo la sezione result
+    resultSection.querySelector('#resultTitle').textContent = ''; // resetto il titolo
+    resultSection.querySelector('#resultText').textContent = ''; // resetto la descrizione
+    scrollTo(0, 0); // torno all'inizio della pagina
+  }
 }
 
 
 
 
-const resetButton = document.querySelector('#button');
-resetButton.addEventListener('click', reset);
+for (const answer of allAnswers) {
+  const questionId = answer.dataset.questionId;
+  if (!questions[questionId]) {
+    questions[questionId] = [];
+  }
+  questions[questionId].push(answer); // popolo il dizionario delle domande con le rispettive risposte
+  userAnswers[questionId] = undefined; // inizializzo il dictionary delle risposte dell'utente
+  answer.addEventListener('click', scegliRisposta); // aggiungo l'eventListener sul click
+}
+
+
+const resetButton = document.querySelector('#reset');
+resetButton.addEventListener('click', reset); // aggiungo l'eventListener per il reset
+
+
 

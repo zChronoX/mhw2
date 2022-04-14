@@ -25,26 +25,23 @@
   height: 85%;
 }
 
-.hidden {
-  display: none;
-}
-
 .uncheck {
   opacity: 0.6;
 }
 
-.choice-grid div.selected{
-  background-color:#cfe3ff;
+.choice-grid div.selected {
+  background-color: #cfe3ff;
 }
-  
-
-
 
 #result {
   display: flex;
   flex-direction: column;
   margin: 20px auto;
   padding: 20px;
+}
+
+#result.hidden {
+  display: none;
 }
 
 #resultTitle {
@@ -86,10 +83,10 @@ button:hover {
 
 @media(max-width: 700px) {
   article {
-    width: 95px;
+    width: 95%;
   }
 
   header div span {
-    background-color: white;
+    display: none;
   }
 }
