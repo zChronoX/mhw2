@@ -16,8 +16,8 @@ function scegliRisposta(event) {
     const answerChoiceId = answer.dataset.choiceId;
     const checkbox = answer.querySelector('.checkbox');
     checkbox.src = answerChoiceId === choiceId ? imgCheck : imgUnchecked; // cambio l'immagine della checkbox in base alla condizione 'answerChoiceId === choiceId'
-    answer.classList.add(answerChoiceId === choiceId ? 'selected' : 'uncheck'); // aggiungo classe css per evidenziare la risposta o opacizzare le altre (regole css da aggiungere)
-    answer.classList.remove(answerChoiceId === choiceId ? 'uncheck' : 'selected'); // rimuovo classe css per evidenziare la risposta o opacizzare le altre (regole css da aggiungere)
+    answer.classList.add(answerChoiceId === choiceId ? 'selected' : 'uncheck'); // aggiungo classe css per evidenziare la risposta o opacizzare le altre 
+    answer.classList.remove(answerChoiceId === choiceId ? 'uncheck' : 'selected'); // rimuovo classe css per evidenziare la risposta o opacizzare le altre 
   }
 
   checkUserAnswers();
